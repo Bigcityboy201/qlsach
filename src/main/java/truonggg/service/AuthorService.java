@@ -2,12 +2,11 @@ package truonggg.service;
 
 import truonggg.dto.AuthorRequestDTO;
 import truonggg.dto.AuthorResponseDTO;
-
-import java.util.List;
+import truonggg.response.PagedResult;
 
 public interface AuthorService {
 
-    List<AuthorResponseDTO> getAll();
+    PagedResult<AuthorResponseDTO> getAll(int page, int size);
 
     AuthorResponseDTO save(AuthorRequestDTO dto);
 

@@ -5,9 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import truonggg.dto.AuthorRequestDTO;
 import truonggg.dto.AuthorResponseDTO;
+import truonggg.response.SuccessReponse;
 import truonggg.service.AuthorService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/author")
@@ -17,22 +16,24 @@ public class AuthorController {
     private final AuthorService authorService;
 
     @GetMapping
-    public List<AuthorResponseDTO> getAll(){
-        return this.authorService.getAll();
+    public SuccessReponse<?> getAll(@RequestParam(defaultValue = "0") int page,
+                                    @RequestParam(defaultValue = "10") int size){
+        return SuccessReponse.ofPaged(this.authorService.getAll(page, size));
     }
 
     @PostMapping
-    public AuthorResponseDTO save(@Valid @RequestBody AuthorRequestDTO dto){
-        return this.authorService.save(dto);
+    public SuccessReponse<AuthorResponseDTO> save(@Valid @RequestBody AuthorRequestDTO dto){
+        return SuccessReponse.of(this.authorService.save(dto));
     }
 
     @PutMapping("/{id}")
-    public AuthorResponseDTO update(@Valid @RequestBody AuthorRequestDTO dto,@PathVariable Integer id){
-        return this.authorService.update(dto,id);
+    public SuccessReponse<AuthorResponseDTO> update(@Valid @RequestBody AuthorRequestDTO dto,@PathVariable Integer id){
+        return SuccessReponse.of(this.authorService.update(dto,id));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@Valid @PathVariable Integer id){
+    public SuccessReponse<String> delete(@Valid @PathVariable Integer id){
          this.authorService.delete(id);
+         return SuccessReponse.of("Delete successfully");
     }
 }

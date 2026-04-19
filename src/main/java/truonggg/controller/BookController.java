@@ -5,9 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import truonggg.dto.BookRequestDTO;
 import truonggg.dto.BookResponseDTO;
+import truonggg.response.SuccessReponse;
 import truonggg.service.BookService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/book")
@@ -16,22 +15,24 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping
-    public List<BookResponseDTO>getAll(){
-        return this.bookService.getAll();
+    public SuccessReponse<?> getAll(@RequestParam(defaultValue = "0") int page,
+                                    @RequestParam(defaultValue = "10") int size){
+        return SuccessReponse.ofPaged(this.bookService.getAll(page, size));
     }
 
     @PostMapping
-    public BookResponseDTO save( @RequestBody @Valid BookRequestDTO dto){
-        return this.bookService.save(dto);
+    public SuccessReponse<BookResponseDTO> save( @RequestBody @Valid BookRequestDTO dto){
+        return SuccessReponse.of(this.bookService.save(dto));
     }
 
     @PutMapping("/{id}")
-    public BookResponseDTO update(@RequestBody @Valid BookRequestDTO dto,@PathVariable Integer id){
-        return this.bookService.update(dto,id);
+    public SuccessReponse<BookResponseDTO> update(@RequestBody @Valid BookRequestDTO dto,@PathVariable Integer id){
+        return SuccessReponse.of(this.bookService.update(dto,id));
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@Valid @PathVariable Integer id){
+    public SuccessReponse<String> delete(@Valid @PathVariable Integer id){
         this.bookService.delete(id);
+        return SuccessReponse.of("Delete successfully");
     }
 }
