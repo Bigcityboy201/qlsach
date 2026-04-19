@@ -1,29 +1,17 @@
 package truonggg.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Setter
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Book {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class Book extends BaseEntity {
 
     private String name;
-
-    private LocalDateTime createAt;
-
-    private LocalDateTime updateAt;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id",referencedColumnName = "id")
@@ -31,4 +19,17 @@ public class Book {
 
     @OneToMany(mappedBy = "book",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Review>reviews;
+
+    public static Book create(String name, Author author) {
+        Book book = new Book();
+        book.name = name;
+        book.author = author;
+        return book;
+    }
+
+    public void updateInfo(String name, Author author) {
+        this.name = name;
+        this.author = author;
+        markUpdatedNow();
+    }
 }
