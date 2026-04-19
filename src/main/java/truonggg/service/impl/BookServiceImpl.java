@@ -1,5 +1,6 @@
 package truonggg.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -8,6 +9,7 @@ import truonggg.dto.BookRequestDTO;
 import truonggg.dto.BookResponseDTO;
 import truonggg.entity.Author;
 import truonggg.entity.Book;
+import truonggg.helper.ServiceValidationHelper;
 import truonggg.handler.BusinessException;
 import truonggg.mapper.BookMapper;
 import truonggg.repository.AuthorRepository;
@@ -15,9 +17,8 @@ import truonggg.repository.BookRepository;
 import truonggg.response.ErrorCode;
 import truonggg.response.PagedResult;
 import truonggg.service.BookService;
-
-import java.time.LocalDateTime;
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
 
@@ -27,24 +28,20 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public PagedResult<BookResponseDTO> getAll(int page, int size) {
-        if (page < 0 || size <= 0) {
-            throw new BusinessException("Page must be >= 0 and size must be > 0", ErrorCode.BAD_REQUEST, "book");
-        }
+        log.info("Get all books with page={}, size={}", page, size);
+        ServiceValidationHelper.validatePageAndSize(page, size, "book");
         Page<Book> books = this.bookRepository.findAll(PageRequest.of(page, size));
         return PagedResult.from(books, this.bookMapper.toDTOList(books.getContent()));
     }
 
     @Override
     public BookResponseDTO save(BookRequestDTO dto) {
-        Author author = authorRepository.findById(dto.getAuthorId())
-                .orElseThrow(() -> new BusinessException("Author not found!", ErrorCode.NOT_FOUND, "author"));
+        log.info("Create book with name={} and authorId={}", dto.getName(), dto.getAuthorId());
+        Author author = ServiceValidationHelper.requireExists(authorRepository.findById(dto.getAuthorId()),
+                () -> new BusinessException("Author not found!", ErrorCode.NOT_FOUND, "author"));
 
-        Book book = bookMapper.toEntity(dto);
-        LocalDateTime now = LocalDateTime.now();
-        book.setCreateAt(now);
-        book.setUpdateAt(now);
-
-        book.setAuthor(author);
+        Book book = bookMapper.toEntity(dto, author);
+        book.markCreatedNow();
 
         Book saved = bookRepository.save(book);
 
@@ -53,20 +50,20 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookResponseDTO update(BookRequestDTO dto, Integer id) {
-        Book book = this.bookRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Book not found!", ErrorCode.NOT_FOUND, "book"));
-        Author author = this.authorRepository.findById(dto.getAuthorId())
-                .orElseThrow(() -> new BusinessException("Author not found!", ErrorCode.NOT_FOUND, "author"));
-        book.setName(dto.getName());
-        book.setAuthor(author);
-        book.setUpdateAt(LocalDateTime.now());
+        log.info("Update book id={} with authorId={}", id, dto.getAuthorId());
+        Book book = ServiceValidationHelper.requireExists(this.bookRepository.findById(id),
+                () -> new BusinessException("Book not found!", ErrorCode.NOT_FOUND, "book"));
+        Author author = ServiceValidationHelper.requireExists(this.authorRepository.findById(dto.getAuthorId()),
+                () -> new BusinessException("Author not found!", ErrorCode.NOT_FOUND, "author"));
+        book.updateInfo(dto.getName(), author);
         return this.bookMapper.toDTO(this.bookRepository.save(book));
     }
 
     @Override
     public void delete(Integer id) {
-        this.bookRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Book not found!", ErrorCode.NOT_FOUND, "book"));
+        log.info("Delete book id={}", id);
+        ServiceValidationHelper.requireExists(this.bookRepository.findById(id),
+                () -> new BusinessException("Book not found!", ErrorCode.NOT_FOUND, "book"));
         this.bookRepository.deleteById(id);
     }
 }
