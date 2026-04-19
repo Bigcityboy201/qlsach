@@ -3,13 +3,14 @@ package truonggg.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import truonggg.constants.ApiPath;
 import truonggg.dto.AuthorRequestDTO;
 import truonggg.dto.AuthorResponseDTO;
 import truonggg.response.SuccessReponse;
 import truonggg.service.AuthorService;
 
 @RestController
-@RequestMapping("/author")
+@RequestMapping(ApiPath.AUTHOR)
 @RequiredArgsConstructor
 public class AuthorController {
 

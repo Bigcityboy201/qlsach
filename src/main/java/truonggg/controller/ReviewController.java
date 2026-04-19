@@ -3,13 +3,14 @@ package truonggg.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import truonggg.constants.ApiPath;
 import truonggg.dto.ReviewRequestDTO;
 import truonggg.dto.ReviewResponseDTO;
 import truonggg.response.SuccessReponse;
 import truonggg.service.ReviewService;
 
 @RestController
-@RequestMapping("/review")
+@RequestMapping(ApiPath.REVIEW)
 @RequiredArgsConstructor
 public class ReviewController {
 

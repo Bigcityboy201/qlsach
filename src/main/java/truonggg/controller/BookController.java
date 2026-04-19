@@ -3,13 +3,14 @@ package truonggg.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import truonggg.constants.ApiPath;
 import truonggg.dto.BookRequestDTO;
 import truonggg.dto.BookResponseDTO;
 import truonggg.response.SuccessReponse;
 import truonggg.service.BookService;
 
 @RestController
-@RequestMapping("/book")
+@RequestMapping(ApiPath.BOOK)
 @RequiredArgsConstructor
 public class BookController {
     private final BookService bookService;
