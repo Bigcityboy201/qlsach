@@ -35,15 +35,11 @@ test:
 
 deploy:
   stage: deploy
-  image: node:20-alpine
+  image: node:20  # Bỏ chữ -alpine, dùng bản Node 20 đầy đủ
   variables:
-    # Docker sẽ lấy biến này từ GitLab và đưa thẳng vào Environment của Container
     RAILWAY_TOKEN: $RAILWAY_TOKEN
   script:
-    # Cài đặt thêm các thư viện cần thiết cho môi trường Docker Alpine
-    - apk add --no-cache libc6-compat
     - npm i -g @railway/cli
-    
     - echo "Deploying to Railway..."
-    # Trong Docker, dùng trực tiếp lệnh up và ép biến RAILWAY_TOKEN
+    # Không cần cài thêm apk add nữa vì bản này đã có sẵn glibc
     - railway up --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --environment "$RAILWAY_ENVIRONMENT_ID" --detach --ci
