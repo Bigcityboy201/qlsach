@@ -37,10 +37,7 @@ deploy:
     - echo "Check token..."
     - test -n "$RAILWAY_TOKEN" || (echo " TOKEN missing" && exit 1)
 
-    - railway link \
-        --project "$RAILWAY_PROJECT_ID" \
-        --service "$RAILWAY_SERVICE_ID" \
-        --environment "$RAILWAY_ENVIRONMENT_ID"
+    - railway link --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --environment "$RAILWAY_ENVIRONMENT_ID"
 
     - railway up --detach
   rules:
