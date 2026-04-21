@@ -9,6 +9,7 @@ import truonggg.dto.ReviewRequestDTO;
 import truonggg.dto.ReviewResponseDTO;
 import truonggg.response.SuccessReponse;
 import truonggg.service.ReviewService;
+import java.util.List;
 
 @RestController
 @RequestMapping(ApiPath.REVIEW)
@@ -18,8 +19,8 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @GetMapping
-    public SuccessReponse<?> getAll(@RequestParam(defaultValue = "0") int page,
-                                    @RequestParam(defaultValue = "10") int size){
+    public SuccessReponse<List<ReviewResponseDTO>> getAll(@RequestParam(defaultValue = "0") int page,
+                                                          @RequestParam(defaultValue = "10") int size){
         return SuccessReponse.ofPaged(this.reviewService.getAll(page, size));
     }
 

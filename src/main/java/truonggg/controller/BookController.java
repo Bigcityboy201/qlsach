@@ -9,6 +9,7 @@ import truonggg.dto.BookResponseDTO;
 import truonggg.dto.DeleteStatusRequestDTO;
 import truonggg.response.SuccessReponse;
 import truonggg.service.BookService;
+import java.util.List;
 
 @RestController
 @RequestMapping(ApiPath.BOOK)
@@ -17,8 +18,8 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping
-    public SuccessReponse<?> getAll(@RequestParam(defaultValue = "0") int page,
-                                    @RequestParam(defaultValue = "10") int size){
+    public SuccessReponse<List<BookResponseDTO>> getAll(@RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "10") int size){
         return SuccessReponse.ofPaged(this.bookService.getAll(page, size));
     }
 

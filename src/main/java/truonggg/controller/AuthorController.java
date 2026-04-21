@@ -9,6 +9,7 @@ import truonggg.dto.AuthorResponseDTO;
 import truonggg.dto.DeleteStatusRequestDTO;
 import truonggg.response.SuccessReponse;
 import truonggg.service.AuthorService;
+import java.util.List;
 
 @RestController
 @RequestMapping(ApiPath.AUTHOR)
@@ -18,8 +19,8 @@ public class AuthorController {
     private final AuthorService authorService;
 
     @GetMapping
-    public SuccessReponse<?> getAll(@RequestParam(defaultValue = "0") int page,
-                                    @RequestParam(defaultValue = "10") int size){
+    public SuccessReponse<List<AuthorResponseDTO>> getAll(@RequestParam(defaultValue = "0") int page,
+                                                          @RequestParam(defaultValue = "10") int size){
         return SuccessReponse.ofPaged(this.authorService.getAll(page, size));
     }
 
