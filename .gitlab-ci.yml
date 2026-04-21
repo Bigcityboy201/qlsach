@@ -37,11 +37,11 @@ deploy:
   stage: deploy
   image: node:20-alpine
   variables:
-    RAILWAY_TOKEN: $RAILWAY_TOKEN 
+    RAILWAY_TOKEN: $RAILWAY_TOKEN # Đảm bảo dòng này có tồn tại
   before_script:
     - npm i -g @railway/cli
   script:
     - echo "Checking variables..."
     - test -n "$RAILWAY_TOKEN" || (echo "TOKEN missing" && exit 1)
-    # Thêm dấu gạch ngang (-) ở đầu lệnh dưới đây
-    - railway up --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --environment "$RAILWAY_ENVIRONMENT_ID" --detach --ci
+    # Thay đổi ở đây: Thêm biến trực tiếp trước lệnh up
+    - RAILWAY_TOKEN=$RAILWAY_TOKEN railway up --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --environment "$RAILWAY_ENVIRONMENT_ID" --detach --ci --verbose
