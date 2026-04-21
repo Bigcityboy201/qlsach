@@ -40,6 +40,6 @@ deploy:
     RAILWAY_TOKEN: $RAILWAY_TOKEN
   script:
     - npm i -g @railway/cli
-    - echo "Deploying to Railway..."
-    # Lệnh tối giản: Railway sẽ tự tìm Project/Service dựa trên Token
-    - railway up --detach --ci
+    - echo "Deploying with Account Token..."
+    # Dùng lại các ID để định hướng chính xác cho Account Token
+    - railway up --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --environment "production" --detach --ci
