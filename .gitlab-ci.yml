@@ -36,6 +36,7 @@ deploy:
   script:
     - echo "Check token..."
     - test -n "$RAILWAY_TOKEN" || (echo "❌ TOKEN missing" && exit 1)
-    - railway up --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --detach
+    - railway link --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID"
+    - railway up --detach
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
