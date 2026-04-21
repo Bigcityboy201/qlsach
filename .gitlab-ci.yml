@@ -3,6 +3,11 @@ stages:
   - test
   - deploy
 
+# Quy tắc chung cho toàn bộ Pipeline: Chỉ chạy khi push vào nhánh main
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
 variables:
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
   MAVEN_CLI_OPTS: "-q --batch-mode --errors --fail-at-end"
@@ -32,17 +37,11 @@ deploy:
   stage: deploy
   image: node:20-alpine
   variables:
-    # Ép Token vào biến môi trường hệ thống của Job
     RAILWAY_TOKEN: $RAILWAY_TOKEN 
   before_script:
     - npm i -g @railway/cli
   script:
     - echo "Checking variables..."
     - test -n "$RAILWAY_TOKEN" || (echo "TOKEN missing" && exit 1)
-    
-    # Sử dụng lệnh up với flag --ci và --detach
-    # Lưu ý: Nếu RAILWAY_ENVIRONMENT_ID của bạn là 'c854...' thì để nguyên, 
-    # nhưng tốt nhất nên dùng tên môi trường là 'production'
-    railway up --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --environment "$RAILWAY_ENVIRONMENT_ID" --detach --ci
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    # Thêm dấu gạch ngang (-) ở đầu lệnh dưới đây
+    - railway up --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --environment "$RAILWAY_ENVIRONMENT_ID" --detach --ci
