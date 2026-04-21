@@ -2,17 +2,17 @@ package truonggg.service;
 
 import truonggg.dto.AuthorRequestDTO;
 import truonggg.dto.AuthorResponseDTO;
-
-import java.util.List;
+import truonggg.dto.DeleteStatusRequestDTO;
+import truonggg.response.PagedResult;
 
 public interface AuthorService {
 
-    List<AuthorResponseDTO> getAll();
+    PagedResult<AuthorResponseDTO> getAll(int page, int size);
 
     AuthorResponseDTO save(AuthorRequestDTO dto);
 
     AuthorResponseDTO update(AuthorRequestDTO dto,Integer id);
 
-    void delete(Integer id);
+    void updateDeleteStatus(Integer id, DeleteStatusRequestDTO dto);
 
 }

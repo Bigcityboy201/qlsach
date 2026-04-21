@@ -1,30 +1,30 @@
 package truonggg.entity;
 
-
 import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Setter
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Review {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private  Integer id;
+public class Review extends BaseEntity {
 
     private String content;
-
-    private LocalDateTime createAt;
-
-    private LocalDateTime updateAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id",referencedColumnName = "id")
     private Book book;
+
+    public static Review create(String content, Book book) {
+        Review review = new Review();
+        review.content = content;
+        review.book = book;
+        return review;
+    }
+
+    public void updateInfo(String content, Book book) {
+        this.content = content;
+        this.book = book;
+        markUpdatedNow();
+    }
 }

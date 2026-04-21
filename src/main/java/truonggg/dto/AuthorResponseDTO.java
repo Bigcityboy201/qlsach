@@ -1,19 +1,14 @@
 package truonggg.dto;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class AuthorResponseDTO {
-
-    private Integer id;
+@JsonPropertyOrder({ "id", "name", "createAt", "updateAt", "totalBook" })
+public class AuthorResponseDTO extends BaseResponseDTO {
     private String name;
-    private LocalDateTime createAt;
-    private LocalDateTime updateAt;
     private Integer totalBook;
 }

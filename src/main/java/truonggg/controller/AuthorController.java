@@ -3,36 +3,41 @@ package truonggg.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import truonggg.constants.ApiPath;
 import truonggg.dto.AuthorRequestDTO;
 import truonggg.dto.AuthorResponseDTO;
+import truonggg.dto.DeleteStatusRequestDTO;
+import truonggg.response.SuccessReponse;
 import truonggg.service.AuthorService;
-
 import java.util.List;
 
 @RestController
-@RequestMapping("/author")
+@RequestMapping(ApiPath.AUTHOR)
 @RequiredArgsConstructor
 public class AuthorController {
 
     private final AuthorService authorService;
 
     @GetMapping
-    public List<AuthorResponseDTO> getAll(){
-        return this.authorService.getAll();
+    public SuccessReponse<List<AuthorResponseDTO>> getAll(@RequestParam(defaultValue = "0") int page,
+                                                          @RequestParam(defaultValue = "10") int size){
+        return SuccessReponse.ofPaged(this.authorService.getAll(page, size));
     }
 
     @PostMapping
-    public AuthorResponseDTO save(@Valid @RequestBody AuthorRequestDTO dto){
-        return this.authorService.save(dto);
+    public SuccessReponse<AuthorResponseDTO> save(@Valid @RequestBody AuthorRequestDTO dto){
+        return SuccessReponse.of(this.authorService.save(dto));
     }
 
     @PutMapping("/{id}")
-    public AuthorResponseDTO update(@Valid @RequestBody AuthorRequestDTO dto,@PathVariable Integer id){
-        return this.authorService.update(dto,id);
+    public SuccessReponse<AuthorResponseDTO> update(@Valid @RequestBody AuthorRequestDTO dto,@PathVariable Integer id){
+        return SuccessReponse.of(this.authorService.update(dto,id));
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@Valid @PathVariable Integer id){
-         this.authorService.delete(id);
+    @PatchMapping("/{id}/delete-status")
+    public SuccessReponse<String> updateDeleteStatus(@Valid @RequestBody DeleteStatusRequestDTO dto,
+                                                     @Valid @PathVariable Integer id){
+         this.authorService.updateDeleteStatus(id, dto);
+         return SuccessReponse.of("Update delete status successfully");
     }
 }

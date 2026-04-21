@@ -1,0 +1,7 @@
+target
+.git
+.idea
+.cursor
+*.iml
+*.log
+node_modules

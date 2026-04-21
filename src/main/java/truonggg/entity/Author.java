@@ -1,30 +1,29 @@
 package truonggg.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Setter
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Author {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class Author extends BaseEntity {
 
     private String name;
-
-    private LocalDateTime createAt;
-
-    private LocalDateTime updateAt;
 
     @OneToMany(mappedBy = "author",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Book>books;
 
+    public static Author create(String name) {
+        Author author = new Author();
+        author.name = name;
+        return author;
+    }
+
+    public void rename(String name) {
+        this.name = name;
+        markUpdatedNow();
+    }
 }
