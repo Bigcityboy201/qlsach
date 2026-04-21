@@ -35,10 +35,9 @@ deploy:
     - npm i -g @railway/cli
   script:
     - echo "Check token..."
-    - test -n "$RAILWAY_TOKEN" || (echo " TOKEN missing" && exit 1)
+    - test -n "$RAILWAY_TOKEN" || (echo "TOKEN missing" && exit 1)
 
-    - railway link --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --environment "$RAILWAY_ENVIRONMENT_ID"
+    - railway up --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --environment "$RAILWAY_ENVIRONMENT_ID" --detach
 
-    - railway up --detach
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
