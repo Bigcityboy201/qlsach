@@ -39,8 +39,11 @@ deploy:
   script:
     - npm i -g @railway/cli
     - echo "Checking environment..."
-    # Lệnh này kiểm tra xem Token có sang được đến Docker không (không làm lộ mã)
-    - if [ -z "$RAILWAY_TOKEN" ]; then echo "LỖI: Token đang bị rỗng!"; exit 1; fi
+    # Cách viết này an toàn hơn cho mọi loại Shell
+    - |
+      if [ -z "$RAILWAY_TOKEN" ]; then
+        echo "LỖI: Token đang bị rỗng!"
+        exit 1
+      fi
     - echo "Deploying to Railway..."
-    # Ép CLI đọc trực tiếp biến môi trường
     - RAILWAY_TOKEN=$RAILWAY_TOKEN railway up --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --environment "production" --detach --ci
