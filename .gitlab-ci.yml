@@ -31,12 +31,12 @@ test:
 deploy:
   stage: deploy
   image: node:20-alpine
-  variables:
-    # Đây là dòng quan trọng nhất: Ép token vào biến môi trường hệ thống
-    RAILWAY_TOKEN: $RAILWAY_TOKEN 
-  script:
+  before_script:
     - npm i -g @railway/cli
-    # Kiểm tra xem CLI có nhận diện được token không trước khi deploy
+  script:
+    - echo "Check token..."
+    - test -n "$RAILWAY_TOKEN" || (echo "RAILWAY_TOKEN missing" && exit 1)
     - railway whoami
-    # Nếu whoami thành công, lệnh up sẽ chạy được
-    - railway up --project "706d1859-3b8f-41d7-825f-68341abf47d8" --service "d0911cf4-bf23-45cd-b420-ed738635d172" --environment "c854a86d-2b0f-4ced-94be-ddfa3780fd90" --detach
+    - railway up --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --detach
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
