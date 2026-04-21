@@ -35,11 +35,11 @@ test:
 
 deploy:
   stage: deploy
-  image: node:20  # Bỏ chữ -alpine, dùng bản Node 20 đầy đủ
+  image: node:20
   variables:
     RAILWAY_TOKEN: $RAILWAY_TOKEN
   script:
     - npm i -g @railway/cli
-    - echo "Deploying to Railway..."
-    # Không cần cài thêm apk add nữa vì bản này đã có sẵn glibc
-    - railway up --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --environment "$RAILWAY_ENVIRONMENT_ID" --detach --ci
+    - echo "Deploying..."
+    # Bỏ flag --environment để CLI tự dùng môi trường mặc định của Token
+    - railway up --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --detach --ci
