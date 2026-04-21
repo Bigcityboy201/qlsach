@@ -31,9 +31,10 @@ test:
 deploy:
   stage: deploy
   image: node:20-alpine
+  variables:
+    # Gán trực tiếp biến từ GitLab vào môi trường của Job
+    RAILWAY_TOKEN: $RAILWAY_TOKEN
   script:
     - npm i -g @railway/cli
-    # Ép các biến vào môi trường chạy của shell
-    - export RAILWAY_TOKEN=$RAILWAY_TOKEN
-    # Chạy lệnh deploy trực tiếp với đầy đủ các ID đã lấy từ URL
+    # Sử dụng lệnh up đơn giản nhất, CLI sẽ tự hiểu Token từ biến môi trường trên
     - railway up --project "706d1859-3b8f-41d7-825f-68341abf47d8" --service "d0911cf4-bf23-45cd-b420-ed738635d172" --environment "c854a86d-2b0f-4ced-94be-ddfa3780fd90" --detach
