@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import truonggg.dto.DeleteStatusRequestDTO;
 import truonggg.dto.ReviewRequestDTO;
 import truonggg.dto.ReviewResponseDTO;
 import truonggg.entity.Book;
@@ -30,7 +32,7 @@ public class ReviewServiceImpl implements ReviewService {
     public PagedResult<ReviewResponseDTO> getAll(int page, int size) {
         log.info("Get all reviews with page={}, size={}", page, size);
         ServiceValidationHelper.validatePageAndSize(page, size, "review");
-        Page<Review> reviews = this.reviewRepository.findAll(PageRequest.of(page, size));
+        Page<Review> reviews = this.reviewRepository.findAllByDeletedFalse(PageRequest.of(page, size));
         return PagedResult.from(reviews, this.reviewMapper.toDTOList(reviews.getContent()));
     }
 
@@ -38,7 +40,7 @@ public class ReviewServiceImpl implements ReviewService {
     public ReviewResponseDTO save(ReviewRequestDTO dto) {
         log.info("Create review for bookId={}", dto.getBookId());
 
-        Book book = ServiceValidationHelper.requireExists(this.bookRepository.findById(dto.getBookId()),
+        Book book = ServiceValidationHelper.requireExists(this.bookRepository.findByIdAndDeletedFalse(dto.getBookId()),
                 () -> new BusinessException("Book not found!", ErrorCode.NOT_FOUND, "book"));
 
         Review review = this.reviewMapper.toEntity(dto, book);
@@ -49,19 +51,27 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public ReviewResponseDTO update(ReviewRequestDTO dto, Integer id) {
         log.info("Update review id={} for bookId={}", id, dto.getBookId());
-        Book book = ServiceValidationHelper.requireExists(this.bookRepository.findById(dto.getBookId()),
+        Book book = ServiceValidationHelper.requireExists(this.bookRepository.findByIdAndDeletedFalse(dto.getBookId()),
                 () -> new BusinessException("Book not found!", ErrorCode.NOT_FOUND, "book"));
-        Review review = ServiceValidationHelper.requireExists(this.reviewRepository.findById(id),
+        Review review = ServiceValidationHelper.requireExists(this.reviewRepository.findByIdAndDeletedFalse(id),
                 () -> new BusinessException("Review not found!", ErrorCode.NOT_FOUND, "review"));
         review.updateInfo(dto.getContent(), book);
         return this.reviewMapper.toDTO(this.reviewRepository.save(review));
     }
 
     @Override
-    public void delete(Integer id) {
-        log.info("Delete review id={}", id);
-        ServiceValidationHelper.requireExists(this.reviewRepository.findById(id),
+    @Transactional
+    public void updateDeleteStatus(Integer id, DeleteStatusRequestDTO dto) {
+        log.info("Update review delete status id={} deleted={}", id, dto.getDeleted());
+        Review review = ServiceValidationHelper.requireExists(this.reviewRepository.findByIdAndDeletedFalse(id),
                 () -> new BusinessException("Review not found!", ErrorCode.NOT_FOUND, "review"));
-        this.reviewRepository.deleteById(id);
+
+        if (Boolean.TRUE.equals(dto.getDeleted())) {
+            review.markDeletedNow();
+        } else {
+            review.restore();
+        }
+
+        this.reviewRepository.save(review);
     }
 }

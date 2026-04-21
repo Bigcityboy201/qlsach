@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import truonggg.dto.DeleteStatusRequestDTO;
 import truonggg.dto.ReviewRequestDTO;
 import truonggg.dto.ReviewResponseDTO;
 import truonggg.entity.Author;
@@ -50,7 +51,7 @@ class ReviewServiceImplTest {
             Review review = TestDataBuilder.review("Great");
             ReviewResponseDTO dto = TestDataBuilder.reviewResponse("Great");
             PageImpl<Review> page = new PageImpl<>(List.of(review), PageRequest.of(0, 10), 1);
-            when(reviewRepository.findAll(PageRequest.of(0, 10))).thenReturn(page);
+            when(reviewRepository.findAllByDeletedFalse(PageRequest.of(0, 10))).thenReturn(page);
             when(reviewMapper.toDTOList(page.getContent())).thenReturn(List.of(dto));
 
             // Act
@@ -72,7 +73,7 @@ class ReviewServiceImplTest {
             ReviewRequestDTO request = TestDataBuilder.reviewRequest(1, "Nice");
             Review review = Review.create("Nice", book);
             ReviewResponseDTO response = TestDataBuilder.reviewResponse("Nice");
-            when(bookRepository.findById(1)).thenReturn(Optional.of(book));
+            when(bookRepository.findByIdAndDeletedFalse(1)).thenReturn(Optional.of(book));
             when(reviewMapper.toEntity(request, book)).thenReturn(review);
             when(reviewRepository.save(review)).thenReturn(review);
             when(reviewMapper.toDTO(review)).thenReturn(response);
@@ -91,7 +92,7 @@ class ReviewServiceImplTest {
         void shouldThrowNotFoundWhenBookMissingOnSave() {
             // Arrange
             ReviewRequestDTO request = TestDataBuilder.reviewRequest(999, "x");
-            when(bookRepository.findById(999)).thenReturn(Optional.empty());
+            when(bookRepository.findByIdAndDeletedFalse(999)).thenReturn(Optional.empty());
 
             // Act
             BusinessException ex = assertThrows(BusinessException.class, () -> reviewService.save(request));
@@ -110,15 +111,17 @@ class ReviewServiceImplTest {
         @DisplayName("Should throw not found when deleting missing review")
         void shouldThrowNotFoundWhenDeletingMissingReview() {
             // Arrange
-            when(reviewRepository.findById(2)).thenReturn(Optional.empty());
+            when(reviewRepository.findByIdAndDeletedFalse(2)).thenReturn(Optional.empty());
+            DeleteStatusRequestDTO req = new DeleteStatusRequestDTO();
+            req.setDeleted(true);
 
             // Act
-            BusinessException ex = assertThrows(BusinessException.class, () -> reviewService.delete(2));
+            BusinessException ex = assertThrows(BusinessException.class, () -> reviewService.updateDeleteStatus(2, req));
 
             // Assert
             assertEquals(ErrorCode.NOT_FOUND, ex.getErrorCode());
             assertEquals("review", ex.getDomain());
-            verify(reviewRepository, never()).deleteById(any());
+            verify(reviewRepository, never()).save(any());
         }
     }
 

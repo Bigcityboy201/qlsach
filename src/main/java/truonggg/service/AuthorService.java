@@ -2,6 +2,7 @@ package truonggg.service;
 
 import truonggg.dto.AuthorRequestDTO;
 import truonggg.dto.AuthorResponseDTO;
+import truonggg.dto.DeleteStatusRequestDTO;
 import truonggg.response.PagedResult;
 
 public interface AuthorService {
@@ -12,6 +13,6 @@ public interface AuthorService {
 
     AuthorResponseDTO update(AuthorRequestDTO dto,Integer id);
 
-    void delete(Integer id);
+    void updateDeleteStatus(Integer id, DeleteStatusRequestDTO dto);
 
 }

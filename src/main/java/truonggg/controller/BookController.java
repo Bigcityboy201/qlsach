@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import truonggg.constants.ApiPath;
 import truonggg.dto.BookRequestDTO;
 import truonggg.dto.BookResponseDTO;
+import truonggg.dto.DeleteStatusRequestDTO;
 import truonggg.response.SuccessReponse;
 import truonggg.service.BookService;
 
@@ -31,9 +32,10 @@ public class BookController {
         return SuccessReponse.of(this.bookService.update(dto,id));
     }
 
-    @DeleteMapping("/{id}")
-    public SuccessReponse<String> delete(@Valid @PathVariable Integer id){
-        this.bookService.delete(id);
-        return SuccessReponse.of("Delete successfully");
+    @PatchMapping("/{id}/delete-status")
+    public SuccessReponse<String> updateDeleteStatus(@RequestBody @Valid DeleteStatusRequestDTO dto,
+                                                     @Valid @PathVariable Integer id){
+        this.bookService.updateDeleteStatus(id, dto);
+        return SuccessReponse.of("Update delete status successfully");
     }
 }

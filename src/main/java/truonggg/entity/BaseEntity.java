@@ -4,6 +4,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Column;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -19,12 +20,20 @@ public abstract class BaseEntity {
 
     private LocalDateTime updateAt;
 
+    @Column(nullable = false)
+    private boolean deleted = false;
+
     protected void setCreateAt(LocalDateTime createAt) {
         this.createAt = createAt;
     }
 
     protected void setUpdateAt(LocalDateTime updateAt) {
         this.updateAt = updateAt;
+    }
+
+    public void restore() {
+        this.deleted = false;
+        markUpdatedNow();
     }
 
     public void markCreatedNow() {
@@ -35,5 +44,10 @@ public abstract class BaseEntity {
 
     public void markUpdatedNow() {
         this.updateAt = LocalDateTime.now();
+    }
+
+    public void markDeletedNow() {
+        this.deleted = true;
+        markUpdatedNow();
     }
 }

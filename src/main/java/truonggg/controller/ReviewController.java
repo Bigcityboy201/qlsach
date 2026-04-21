@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import truonggg.constants.ApiPath;
+import truonggg.dto.DeleteStatusRequestDTO;
 import truonggg.dto.ReviewRequestDTO;
 import truonggg.dto.ReviewResponseDTO;
 import truonggg.response.SuccessReponse;
@@ -32,9 +33,10 @@ public class ReviewController {
         return SuccessReponse.of(this.reviewService.update(dto,id));
     }
 
-    @DeleteMapping("/{id}")
-    public SuccessReponse<String> delete(@Valid @PathVariable Integer id){
-        this.reviewService.delete(id);
-        return SuccessReponse.of("Delete successfully");
+    @PatchMapping("/{id}/delete-status")
+    public SuccessReponse<String> updateDeleteStatus(@Valid @RequestBody DeleteStatusRequestDTO dto,
+                                                     @Valid @PathVariable Integer id){
+        this.reviewService.updateDeleteStatus(id, dto);
+        return SuccessReponse.of("Update delete status successfully");
     }
 }

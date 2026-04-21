@@ -11,10 +11,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import truonggg.dto.AuthorRequestDTO;
 import truonggg.dto.AuthorResponseDTO;
+import truonggg.dto.DeleteStatusRequestDTO;
 import truonggg.entity.Author;
 import truonggg.handler.BusinessException;
 import truonggg.mapper.AuthorMapper;
 import truonggg.repository.AuthorRepository;
+import truonggg.repository.BookRepository;
+import truonggg.repository.ReviewRepository;
 import truonggg.response.ErrorCode;
 import truonggg.response.PagedResult;
 
@@ -32,6 +35,10 @@ class AuthorServiceImplTest {
     private AuthorMapper authorMapper;
     @Mock
     private AuthorRepository authorRepository;
+    @Mock
+    private BookRepository bookRepository;
+    @Mock
+    private ReviewRepository reviewRepository;
     @InjectMocks
     private AuthorServiceImpl authorService;
 
@@ -45,7 +52,7 @@ class AuthorServiceImplTest {
             Author author = Author.create("Tolkien");
             AuthorResponseDTO response = TestDataBuilder.authorResponse("Tolkien");
             PageImpl<Author> page = new PageImpl<>(List.of(author), PageRequest.of(0, 10), 1);
-            when(authorRepository.findAll(PageRequest.of(0, 10))).thenReturn(page);
+            when(authorRepository.findAllByDeletedFalse(PageRequest.of(0, 10))).thenReturn(page);
             when(authorMapper.toDTOList(page.getContent())).thenReturn(List.of(response));
 
             // Act
@@ -103,7 +110,7 @@ class AuthorServiceImplTest {
         @DisplayName("Should throw not found when updating missing author")
         void shouldThrowNotFoundWhenUpdatingMissingAuthor() {
             // Arrange
-            when(authorRepository.findById(9)).thenReturn(Optional.empty());
+            when(authorRepository.findByIdAndDeletedFalse(9)).thenReturn(Optional.empty());
 
             // Act
             BusinessException ex = assertThrows(BusinessException.class,
@@ -119,15 +126,17 @@ class AuthorServiceImplTest {
         @DisplayName("Should throw not found when deleting missing author")
         void shouldThrowNotFoundWhenDeletingMissingAuthor() {
             // Arrange
-            when(authorRepository.findById(9)).thenReturn(Optional.empty());
+            when(authorRepository.findByIdAndDeletedFalse(9)).thenReturn(Optional.empty());
+            DeleteStatusRequestDTO req = new DeleteStatusRequestDTO();
+            req.setDeleted(true);
 
             // Act
-            BusinessException ex = assertThrows(BusinessException.class, () -> authorService.delete(9));
+            BusinessException ex = assertThrows(BusinessException.class, () -> authorService.updateDeleteStatus(9, req));
 
             // Assert
             assertEquals(ErrorCode.NOT_FOUND, ex.getErrorCode());
             assertEquals("author", ex.getDomain());
-            verify(authorRepository, never()).deleteById(any());
+            verify(authorRepository, never()).save(any());
         }
     }
 

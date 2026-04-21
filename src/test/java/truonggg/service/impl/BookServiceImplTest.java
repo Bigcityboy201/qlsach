@@ -11,12 +11,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import truonggg.dto.BookRequestDTO;
 import truonggg.dto.BookResponseDTO;
+import truonggg.dto.DeleteStatusRequestDTO;
 import truonggg.entity.Author;
 import truonggg.entity.Book;
 import truonggg.handler.BusinessException;
 import truonggg.mapper.BookMapper;
 import truonggg.repository.AuthorRepository;
 import truonggg.repository.BookRepository;
+import truonggg.repository.ReviewRepository;
 import truonggg.response.ErrorCode;
 import truonggg.response.PagedResult;
 
@@ -36,6 +38,8 @@ class BookServiceImplTest {
     private BookRepository bookRepository;
     @Mock
     private AuthorRepository authorRepository;
+    @Mock
+    private ReviewRepository reviewRepository;
 
     @InjectMocks
     private BookServiceImpl bookService;
@@ -51,7 +55,7 @@ class BookServiceImplTest {
             BookResponseDTO dto = TestDataBuilder.bookResponse("Clean Code");
             PageImpl<Book> page = new PageImpl<>(List.of(book), PageRequest.of(0, 10), 1);
 
-            when(bookRepository.findAll(PageRequest.of(0, 10))).thenReturn(page);
+            when(bookRepository.findAllByDeletedFalse(PageRequest.of(0, 10))).thenReturn(page);
             when(bookMapper.toDTOList(page.getContent())).thenReturn(List.of(dto));
 
             // Act
@@ -60,7 +64,7 @@ class BookServiceImplTest {
             // Assert
             assertEquals(1, result.getTotalElements());
             assertEquals(1, result.getContent().size());
-            verify(bookRepository).findAll(PageRequest.of(0, 10));
+            verify(bookRepository).findAllByDeletedFalse(PageRequest.of(0, 10));
         }
 
         @Test
@@ -92,7 +96,7 @@ class BookServiceImplTest {
             Book book = Book.create("DDD", author);
             BookResponseDTO response = TestDataBuilder.bookResponse("DDD");
 
-            when(authorRepository.findById(1)).thenReturn(Optional.of(author));
+            when(authorRepository.findByIdAndDeletedFalse(1)).thenReturn(Optional.of(author));
             when(bookMapper.toEntity(request, author)).thenReturn(book);
             when(bookRepository.save(book)).thenReturn(book);
             when(bookMapper.toDTO(book)).thenReturn(response);
@@ -112,7 +116,7 @@ class BookServiceImplTest {
         void shouldThrowNotFoundWhenAuthorMissing() {
             // Arrange
             BookRequestDTO request = TestDataBuilder.bookRequest("DDD", 88);
-            when(authorRepository.findById(88)).thenReturn(Optional.empty());
+            when(authorRepository.findByIdAndDeletedFalse(88)).thenReturn(Optional.empty());
 
             // Act
             BusinessException ex = assertThrows(BusinessException.class, () -> bookService.save(request));
@@ -136,8 +140,8 @@ class BookServiceImplTest {
             Book book = Book.create("Old", author);
             BookResponseDTO response = TestDataBuilder.bookResponse("Refactoring");
 
-            when(bookRepository.findById(1)).thenReturn(Optional.of(book));
-            when(authorRepository.findById(2)).thenReturn(Optional.of(author));
+            when(bookRepository.findByIdAndDeletedFalse(1)).thenReturn(Optional.of(book));
+            when(authorRepository.findByIdAndDeletedFalse(2)).thenReturn(Optional.of(author));
             when(bookRepository.save(book)).thenReturn(book);
             when(bookMapper.toDTO(book)).thenReturn(response);
 
@@ -155,7 +159,7 @@ class BookServiceImplTest {
         void shouldThrowNotFoundWhenTargetBookMissing() {
             // Arrange
             BookRequestDTO request = TestDataBuilder.bookRequest("Refactoring", 2);
-            when(bookRepository.findById(999)).thenReturn(Optional.empty());
+            when(bookRepository.findByIdAndDeletedFalse(999)).thenReturn(Optional.empty());
 
             // Act
             BusinessException ex = assertThrows(BusinessException.class, () -> bookService.update(request, 999));
@@ -174,28 +178,34 @@ class BookServiceImplTest {
         @DisplayName("Should delete successfully when book exists")
         void shouldDeleteSuccessfullyWhenBookExists() {
             // Arrange
-            when(bookRepository.findById(7)).thenReturn(Optional.of(TestDataBuilder.book("x")));
+            when(bookRepository.findByIdAndDeletedFalse(7)).thenReturn(Optional.of(TestDataBuilder.book("x")));
+            when(reviewRepository.findAllByBookIdAndDeletedFalse(7)).thenReturn(List.of());
+            DeleteStatusRequestDTO req = new DeleteStatusRequestDTO();
+            req.setDeleted(true);
 
             // Act
-            bookService.delete(7);
+            bookService.updateDeleteStatus(7, req);
 
             // Assert
-            verify(bookRepository).deleteById(7);
+            verify(reviewRepository).findAllByBookIdAndDeletedFalse(7);
+            verify(bookRepository).save(any());
         }
 
         @Test
         @DisplayName("Should throw not found when book does not exist")
         void shouldThrowNotFoundWhenBookDoesNotExist() {
             // Arrange
-            when(bookRepository.findById(7)).thenReturn(Optional.empty());
+            when(bookRepository.findByIdAndDeletedFalse(7)).thenReturn(Optional.empty());
+            DeleteStatusRequestDTO req = new DeleteStatusRequestDTO();
+            req.setDeleted(true);
 
             // Act
-            BusinessException ex = assertThrows(BusinessException.class, () -> bookService.delete(7));
+            BusinessException ex = assertThrows(BusinessException.class, () -> bookService.updateDeleteStatus(7, req));
 
             // Assert
             assertEquals(ErrorCode.NOT_FOUND, ex.getErrorCode());
             assertEquals("book", ex.getDomain());
-            verify(bookRepository, never()).deleteById(any());
+            verify(bookRepository, never()).save(any());
         }
     }
 
