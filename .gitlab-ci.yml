@@ -31,11 +31,9 @@ test:
 deploy:
   stage: deploy
   image: node:20-alpine
-  before_script:
-    - npm i -g @railway/cli
+  variables:
+    # Chỉ định rõ cho Railway biết đây là ứng dụng Java
+    RAILWAY_DOCKER_IMAGE_NAME: eclipse-temurin:17-jdk
   script:
-    # Không cần login riêng nếu dùng RAILWAY_TOKEN trực tiếp trong các lệnh sau
-    - railway up --token $RAILWAY_TOKEN --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --detach
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
+    - npm i -g @railway/cli
+    - railway status --token "$RAILWAY_TOKEN" --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID" --detach --verbose
