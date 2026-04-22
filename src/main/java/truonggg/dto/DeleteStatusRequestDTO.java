@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class DeleteStatusRequestDTO {
-    @NotNull
+    @NotNull(message = "Trạng thái xóa không được để trống")
     private Boolean deleted;
 }
 
